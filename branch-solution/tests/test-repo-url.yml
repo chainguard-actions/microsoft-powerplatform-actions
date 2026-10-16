@@ -1,4 +1,4 @@
-name: Test branch-solution with repo-url input
+name: Test branch-solution with explicit repo-url
 on:
   workflow_dispatch:
 jobs:
@@ -42,7 +42,7 @@ jobs:
           clobber-branch: 'true'
         continue-on-error: true
 
-      - name: Assert action ran with repo-url
+      - name: Assert action ran with explicit repo-url
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |

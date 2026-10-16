@@ -12,10 +12,10 @@ jobs:
           mkdir -p "$GITHUB_WORKSPACE/test-input"
           mkdir -p "$GITHUB_WORKSPACE/test-output-mapfile"
           cd "$GITHUB_WORKSPACE/test-input"
-          echo '<?xml version="1.0" encoding="utf-8"?><ImportExportXml version="9.1.0.0" SolutionPackageVersion="9.1" languagecode="1033" generatedBy="CrmExport"><SolutionManifest><UniqueName>TestMapSolution</UniqueName><LocalizedNames><LocalizedName description="Test Map Solution" languagecode="1033"/></LocalizedNames><Version>1.0.0.0</Version><Managed>0</Managed></SolutionManifest></ImportExportXml>' > Solution.xml
-          zip -j "$GITHUB_WORKSPACE/test-input/TestMapSolution.zip" Solution.xml
+          echo '<?xml version="1.0" encoding="utf-8"?><ImportExportXml version="9.1.0.0" SolutionPackageVersion="9.1" languagecode="1033" generatedBy="CrmExport"><SolutionManifest><UniqueName>TestSolution</UniqueName><LocalizedNames><LocalizedName description="Test Solution" languagecode="1033"/></LocalizedNames><Version>1.0.0.0</Version><Managed>0</Managed></SolutionManifest></ImportExportXml>' > Solution.xml
+          zip -j "$GITHUB_WORKSPACE/test-input/TestSolution.zip" Solution.xml
           # Create a minimal mapping XML file
-          cat > "$GITHUB_WORKSPACE/test-input/mapping.xml" <<'EOF'
+          cat > "$GITHUB_WORKSPACE/test-input/mapping.xml" << 'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <Mapping>
           </Mapping>
@@ -25,7 +25,7 @@ jobs:
         uses: .
         continue-on-error: true
         with:
-          solution-file: "${{ github.workspace }}/test-input/TestMapSolution.zip"
+          solution-file: "${{ github.workspace }}/test-input/TestSolution.zip"
           solution-folder: "${{ github.workspace }}/test-output-mapfile"
           solution-type: Unmanaged
           overwrite-files: 'true'

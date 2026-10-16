@@ -1,4 +1,4 @@
-name: Test pack-solution localize options
+name: Test pack-solution with localize options
 on:
   workflow_dispatch:
 jobs:
@@ -9,14 +9,14 @@ jobs:
 
       - name: Create minimal solution folder structure
         run: |
-          mkdir -p "$GITHUB_WORKSPACE/hardened/tests/fixtures/solution-localize/Other"
-          cat > "$GITHUB_WORKSPACE/hardened/tests/fixtures/solution-localize/Other/Solution.xml" << 'EOF'
+          mkdir -p "$GITHUB_WORKSPACE/tests/fixtures/solution-loc/Other"
+          cat > "$GITHUB_WORKSPACE/tests/fixtures/solution-loc/Other/Solution.xml" << 'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <ImportExportXml version="9.0.0.0" SolutionPackageVersion="9.0" languagecode="1033" generatedBy="CrmLive">
             <SolutionManifest>
-              <UniqueName>LocalizeSolution</UniqueName>
+              <UniqueName>TestSolutionLoc</UniqueName>
               <LocalizedNames>
-                <LocalizedName description="Localize Solution" languagecode="1033" />
+                <LocalizedName description="Test Solution Loc" languagecode="1033" />
               </LocalizedNames>
               <Descriptions />
               <Version>1.0.0.0</Version>
@@ -43,8 +43,8 @@ jobs:
         uses: .
         continue-on-error: true
         with:
-          solution-file: "${{ github.workspace }}/hardened/tests/fixtures/LocalizeSolution.zip"
-          solution-folder: "${{ github.workspace }}/hardened/tests/fixtures/solution-localize"
+          solution-file: "${{ github.workspace }}/tests/fixtures/TestSolutionLoc.zip"
+          solution-folder: "${{ github.workspace }}/tests/fixtures/solution-loc"
           solution-type: "Unmanaged"
           localize: "true"
           locale-template: "1033"

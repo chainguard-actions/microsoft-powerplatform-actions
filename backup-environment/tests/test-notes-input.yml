@@ -11,7 +11,7 @@ jobs:
         continue-on-error: true
         with:
           environment-url: 'https://test-env.crm.dynamics.com'
-          backup-label: 'test-backup-notes'
+          backup-label: 'test-backup-with-notes'
           notes: 'This is a deprecated notes field test'
           app-id: 'fake-app-id'
           client-secret: 'fake-client-secret'

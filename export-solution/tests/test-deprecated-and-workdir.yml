@@ -1,4 +1,4 @@
-name: Test working-directory and solution-version inputs
+name: Test deprecated solution-version and working-directory inputs
 on:
   workflow_dispatch:
 jobs:
@@ -20,15 +20,15 @@ jobs:
           solution-version: '1.0.0.0'
           solution-output-file: 'TestSolution.zip'
           working-directory: '/tmp/pp-workdir'
-      - name: Assert action ran and failed gracefully (invalid credentials expected)
+      - name: Assert action ran (failed gracefully with invalid credentials)
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
           echo "outcome: $OUTCOME"
-          if [ "$OUTCOME" = "failure" ]; then
-            echo "PASS: action failed gracefully as expected with invalid credentials"
-          elif [ "$OUTCOME" = "success" ]; then
-            echo "PASS: action succeeded (unexpected but acceptable)"
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded unexpectedly (real env available)"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully as expected with fake credentials and deprecated input"
           else
             echo "FAIL: unexpected outcome '$OUTCOME'"
             exit 1

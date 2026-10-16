@@ -1,4 +1,4 @@
-name: Test optional inputs (solution-version, target-folder, working-directory)
+name: Test optional inputs (target-folder, working-directory, solution-version)
 on:
   workflow_dispatch:
 jobs:
@@ -20,18 +20,18 @@ jobs:
           tenant-id: 'fake-tenant-id'
           solution-name: 'FakeSolution'
           solution-version: '1.0.0.0'
-          target-folder: 'cloned-solution'
-          working-directory: 'work-dir'
+          target-folder: '${{ github.workspace }}/cloned-solution'
+          working-directory: '${{ github.workspace }}/work-dir'
 
       - name: Assert action ran (fails gracefully with fake credentials)
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
           echo "outcome: $OUTCOME"
-          if [ "$OUTCOME" = "failure" ]; then
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded unexpectedly (real env?)"
+          elif [ "$OUTCOME" = "failure" ]; then
             echo "PASS: action failed gracefully as expected with fake credentials"
-          elif [ "$OUTCOME" = "success" ]; then
-            echo "PASS: action succeeded (unexpected but acceptable)"
           else
             echo "FAIL: unexpected outcome '$OUTCOME'"
             exit 1

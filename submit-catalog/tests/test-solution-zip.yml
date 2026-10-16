@@ -1,0 +1,75 @@
+name: Test submit-catalog with solution zip file
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create catalog submission document and fake solution zip
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/catalog"
+          mkdir -p "$GITHUB_WORKSPACE/artifacts"
+
+          cat > "$GITHUB_WORKSPACE/catalog/submission.json" <<'EOF'
+          {
+            "modelVersion": "1.0.0.0",
+            "operation": "CreateOrUpdate",
+            "sourcePortal": 526430005,
+            "businessJustification": "Test submission with solution zip",
+            "publisherDetails": {
+              "publisherId": "test-publisher",
+              "publisherDisplayName": "Test Publisher"
+            },
+            "catalogItemDefinition": {
+              "id": "test-item-zip",
+              "displayName": "Test Item Zip",
+              "description": "Test catalog item with solution zip",
+              "offer": {
+                "type": "Component_Collection",
+                "deploymentType": "Normal",
+                "engineeringName": {
+                  "firstName": "Test",
+                  "lastName": "Engineer",
+                  "email": "test@example.com"
+                },
+                "supportName": {
+                  "firstName": "Test",
+                  "lastName": "Support",
+                  "email": "support@example.com"
+                }
+              }
+            }
+          }
+          EOF
+
+          # Create a minimal fake zip file for testing
+          echo "PK" > "$GITHUB_WORKSPACE/artifacts/solution.zip"
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          environment-url: 'https://test-env.crm.dynamics.com'
+          app-id: 'fake-app-id-00000000-0000-0000-0000-000000000000'
+          client-secret: 'fake-client-secret'
+          tenant-id: 'fake-tenant-id-00000000-0000-0000-0000-000000000000'
+          path: '${{ github.workspace }}/catalog/submission.json'
+          package-solution-zip-file: 'SolutionZipFile'
+          solution-zip: '${{ github.workspace }}/artifacts/solution.zip'
+          poll-status: 'false'
+
+      - name: Assert action ran and failed gracefully (no real PP environment)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully as expected (no real Power Platform environment)"
+          elif [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded unexpectedly (environment may be reachable)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

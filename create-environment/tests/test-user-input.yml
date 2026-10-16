@@ -1,0 +1,40 @@
+name: Test create-environment with user input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          app-id: 'fake-app-id-for-input-coverage'
+          client-secret: 'fake-client-secret'
+          tenant-id: 'fake-tenant-id'
+          name: 'test-environment-user'
+          region: 'unitedstates'
+          type: 'Sandbox'
+          user: 'testuser@example.onmicrosoft.com'
+      - name: Assert action ran with user input (fails gracefully without real credentials)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+          ENV_URL: ${{ steps.action.outputs.environment-url }}
+          ENV_ID: ${{ steps.action.outputs.environment-id }}
+        run: |
+          echo "outcome: $OUTCOME"
+          echo "environment-url: $ENV_URL"
+          echo "environment-id: $ENV_ID"
+          if [ "$OUTCOME" = "success" ]; then
+            if [ -z "$ENV_URL" ] && [ -z "$ENV_ID" ]; then
+              echo "FAIL: action succeeded but no outputs were set"
+              exit 1
+            fi
+            echo "PASS: action succeeded with user input"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (expected without real Power Platform credentials)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

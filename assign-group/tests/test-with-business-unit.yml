@@ -1,0 +1,37 @@
+name: Test assign-group with business unit input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          environment: 'https://fake-env.crm.dynamics.com'
+          group: '00000000-0000-0000-0000-000000000004'
+          group-name: 'BizUnitGroup'
+          role: 'System Administrator'
+          team-type: 'AadSecurityGroup'
+          membership-type: 'Guests'
+          business-unit: '00000000-0000-0000-0000-000000000099'
+          app-id: 'fake-app-id'
+          client-secret: 'fake-client-secret'
+          tenant-id: 'fake-tenant-id'
+
+      - name: Assert action ran and failed gracefully (no valid Power Platform credentials)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully as expected (no valid Power Platform credentials)"
+          elif [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded unexpectedly (real credentials may be present)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

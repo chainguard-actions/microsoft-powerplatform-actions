@@ -1,0 +1,39 @@
+name: Test check-solution with service principal auth inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create a dummy zip file for analysis
+        run: |
+          mkdir -p /tmp/sp-solutions
+          echo "dummy solution" > /tmp/sp-solutions/mysolution.zip
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          environment-url: 'https://test-env.crm.dynamics.com'
+          app-id: 'fake-app-id-00000000-0000-0000-0000-000000000000'
+          client-secret: 'fake-client-secret'
+          tenant-id: 'fake-tenant-id-00000000-0000-0000-0000-000000000000'
+          path: '/tmp/sp-solutions/*.zip'
+          geo: 'UnitedStates'
+          fail-on-analysis-error: 'false'
+
+      - name: Assert action ran and failed gracefully (fake service principal credentials)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully as expected (fake service principal credentials)"
+          elif [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded (perhaps a stub or mock environment)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

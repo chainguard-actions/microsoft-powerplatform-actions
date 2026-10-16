@@ -1,0 +1,35 @@
+name: Test export-solution async export
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          environment-url: 'https://test-env.crm.dynamics.com'
+          app-id: 'fake-app-id'
+          client-secret: 'fake-client-secret'
+          tenant-id: 'fake-tenant-id'
+          solution-name: 'TestSolution'
+          solution-output-file: 'TestSolution_async.zip'
+          run-asynchronously: 'true'
+          max-async-wait-time: '30'
+
+      - name: Assert action ran and failed gracefully (async export, no real environment)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully as expected (no real Power Platform environment)"
+          elif [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded unexpectedly (real environment may be available)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

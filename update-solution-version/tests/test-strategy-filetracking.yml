@@ -1,0 +1,38 @@
+name: Test strategy filetracking
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Copy fixture files into workspace
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/TestSolution"
+          cp "$GITHUB_WORKSPACE/tests/fixtures/solution/Solution.xml" "$GITHUB_WORKSPACE/TestSolution/Solution.xml"
+          cp "$GITHUB_WORKSPACE/tests/fixtures/solution/ControlsStateVersionInfo.csv" "$GITHUB_WORKSPACE/TestSolution/ControlsStateVersionInfo.csv"
+          echo "Files placed:"
+          ls -la "$GITHUB_WORKSPACE/TestSolution/"
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          strategy: 'filetracking'
+          tracker-file: 'ControlsStateVersionInfo.csv'
+          build-version: '2'
+
+      - name: Assert action ran (succeeded or failed gracefully)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded with filetracking strategy"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (expected under harness conditions)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

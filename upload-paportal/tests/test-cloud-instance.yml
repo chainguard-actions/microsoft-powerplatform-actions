@@ -1,0 +1,39 @@
+name: Test upload-paportal with non-default cloud instance
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create a dummy upload path
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/portal-content"
+          echo "dummy content" > "$GITHUB_WORKSPACE/portal-content/index.html"
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          environment-url: 'https://fake-env.crm.dynamics.com'
+          app-id: '00000000-0000-0000-0000-000000000001'
+          client-secret: 'fake-client-secret-value'
+          tenant-id: '00000000-0000-0000-0000-000000000002'
+          cloud: 'UsGov'
+          upload-path: '${{ github.workspace }}/portal-content'
+
+      - name: Assert action ran and failed gracefully with non-default cloud
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully as expected with non-default cloud and invalid credentials"
+          elif [ "$OUTCOME" = "success" ]; then
+            echo "FAIL: action unexpectedly succeeded with fake credentials"
+            exit 1
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

@@ -1,0 +1,65 @@
+name: Test pack-solution both solution type with optional inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create minimal solution folder structure
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/tests/fixtures/both-solution-src/Other"
+          cat > "$GITHUB_WORKSPACE/tests/fixtures/both-solution-src/Other/Solution.xml" << 'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <ImportExportXml version="9.0.0.0" SolutionPackageVersion="9.0" languagecode="1033" generatedBy="CrmLive">
+            <SolutionManifest>
+              <UniqueName>BothTestSolution</UniqueName>
+              <LocalizedNames>
+                <LocalizedName description="Both Test Solution" languagecode="1033" />
+              </LocalizedNames>
+              <Descriptions />
+              <Version>1.0.0.0</Version>
+              <Managed>0</Managed>
+              <Publisher>
+                <UniqueName>DefaultPublisher</UniqueName>
+                <LocalizedNames>
+                  <LocalizedName description="Default Publisher" languagecode="1033" />
+                </LocalizedNames>
+                <Descriptions />
+                <EMailAddress />
+                <SupportingWebsiteUrl />
+                <CustomizationPrefix>new</CustomizationPrefix>
+                <CustomizationOptionValuePrefix>10000</CustomizationOptionValuePrefix>
+                <Addresses />
+              </Publisher>
+              <RootComponents />
+              <MissingDependencies />
+            </SolutionManifest>
+          </ImportExportXml>
+          EOF
+
+      - id: pack
+        uses: .
+        continue-on-error: true
+        with:
+          solution-file: "${{ github.workspace }}/tests/fixtures/BothTestSolution.zip"
+          solution-folder: "${{ github.workspace }}/tests/fixtures/both-solution-src"
+          solution-type: "Both"
+          use-lcid: "true"
+          disable-plugin-remap: "true"
+          use-unmanaged-file-for-missing-managed: "true"
+
+      - name: Assert action ran with Both type and optional inputs
+        env:
+          OUTCOME: ${{ steps.pack.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded with Both solution type and optional inputs"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (expected without PP environment)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

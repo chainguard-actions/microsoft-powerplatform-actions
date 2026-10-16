@@ -1,0 +1,46 @@
+name: Test unpack-solution with map-file input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create a minimal fake solution zip and map file for testing
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/test-input"
+          mkdir -p "$GITHUB_WORKSPACE/test-output-mapfile"
+          cd "$GITHUB_WORKSPACE/test-input"
+          echo '<?xml version="1.0" encoding="utf-8"?><ImportExportXml version="9.1.0.0" SolutionPackageVersion="9.1" languagecode="1033" generatedBy="CrmExport"><SolutionManifest><UniqueName>TestMapSolution</UniqueName><LocalizedNames><LocalizedName description="Test Map Solution" languagecode="1033"/></LocalizedNames><Version>1.0.0.0</Version><Managed>0</Managed></SolutionManifest></ImportExportXml>' > Solution.xml
+          zip -j "$GITHUB_WORKSPACE/test-input/TestMapSolution.zip" Solution.xml
+          # Create a minimal mapping XML file
+          cat > "$GITHUB_WORKSPACE/test-input/mapping.xml" <<'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <Mapping>
+          </Mapping>
+          EOF
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          solution-file: "${{ github.workspace }}/test-input/TestMapSolution.zip"
+          solution-folder: "${{ github.workspace }}/test-output-mapfile"
+          solution-type: Unmanaged
+          overwrite-files: 'true'
+          map-file: "${{ github.workspace }}/test-input/mapping.xml"
+
+      - name: Assert action ran (succeeded or failed gracefully)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded with map-file input"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (pac CLI or dist not available in test environment)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

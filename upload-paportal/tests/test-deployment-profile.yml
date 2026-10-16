@@ -1,0 +1,40 @@
+name: Test upload-paportal with deployment profile and model version
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create a dummy upload path with portal structure
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/portal-content/web-pages"
+          echo "dummy page" > "$GITHUB_WORKSPACE/portal-content/web-pages/home.html"
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          environment-url: 'https://fake-env.crm.dynamics.com'
+          app-id: '00000000-0000-0000-0000-000000000001'
+          client-secret: 'fake-client-secret-value'
+          tenant-id: '00000000-0000-0000-0000-000000000002'
+          upload-path: '${{ github.workspace }}/portal-content'
+          deployment-profile: 'staging'
+          model-version: '2'
+
+      - name: Assert action ran and failed gracefully with optional inputs set
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully as expected (invalid credentials, optional inputs accepted)"
+          elif [ "$OUTCOME" = "success" ]; then
+            echo "FAIL: action unexpectedly succeeded with fake credentials"
+            exit 1
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

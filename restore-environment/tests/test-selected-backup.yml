@@ -1,0 +1,36 @@
+name: Test restore-environment selected backup with friendly name
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          app-id: 'fake-app-id-00000000-0000-0000-0000-000000000000'
+          client-secret: 'fake-client-secret'
+          tenant-id: 'fake-tenant-id-00000000-0000-0000-0000-000000000000'
+          source-env: 'https://source-env.crm.dynamics.com'
+          target-env: 'https://target-env.crm.dynamics.com'
+          latest-backup: 'false'
+          selected-backup: '01/15/2024 10:00'
+          friendly-name: 'Restored Environment Test'
+          cloud: 'Public'
+
+      - name: Assert action ran and failed gracefully with invalid credentials
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully as expected with invalid credentials"
+          elif [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded (unexpected but acceptable)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

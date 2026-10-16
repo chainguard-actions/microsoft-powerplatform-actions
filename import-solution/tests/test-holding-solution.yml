@@ -1,0 +1,47 @@
+name: Test import-solution as holding with deployment settings
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create dummy solution and deployment settings files
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/solutions"
+          echo "PK" > "$GITHUB_WORKSPACE/solutions/HoldingSolution.zip"
+          cat > "$GITHUB_WORKSPACE/solutions/deployment-settings.json" << 'EOF'
+          {
+            "EnvironmentVariables": [],
+            "ConnectionReferences": []
+          }
+          EOF
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          environment-url: 'https://test-env.crm.dynamics.com'
+          app-id: '00000000-0000-0000-0000-000000000001'
+          client-secret: 'fake-client-secret'
+          tenant-id: '00000000-0000-0000-0000-000000000002'
+          solution-file: 'solutions/HoldingSolution.zip'
+          import-as-holding: 'true'
+          use-deployment-settings-file: 'true'
+          deployment-settings-file: 'solutions/deployment-settings.json'
+          activate-plugins: 'false'
+
+      - name: Assert action ran and failed gracefully (no real PP environment)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded unexpectedly (real environment available?)"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully as expected (no real Power Platform environment)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

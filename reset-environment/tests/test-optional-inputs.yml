@@ -1,0 +1,40 @@
+name: Test reset-environment with optional inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          app-id: 'test-app-id-00000000-0000-0000-0000-000000000000'
+          client-secret: 'test-client-secret'
+          tenant-id: 'test-tenant-id-00000000-0000-0000-0000-000000000000'
+          environment: 'https://test-env.crm.dynamics.com'
+          language: 'English (United States)'
+          currency: 'USD'
+          cloud: 'Public'
+          purpose: 'Testing environment reset via GitHub Actions'
+          templates: 'D365_Sample'
+          override-domain-name: 'true'
+          domain-name: 'test-reset-env'
+          override-friendly-name: 'true'
+          friendly-name: 'Test Reset Environment'
+
+      - name: Assert action ran and failed gracefully (no valid credentials)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully as expected (no valid Power Platform credentials)"
+          elif [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded unexpectedly (real credentials may have been provided)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

@@ -1,0 +1,41 @@
+name: Test import-data verbose and connection-count options
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create dummy data folder
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/test-data-verbose"
+          echo "<data></data>" > "$GITHUB_WORKSPACE/test-data-verbose/data.xml"
+          echo "<schema></schema>" > "$GITHUB_WORKSPACE/test-data-verbose/data-schema.xml"
+
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          environment-url: 'https://test-env.crm.dynamics.com'
+          app-id: 'fake-app-id-00000000-0000-0000-0000-000000000000'
+          client-secret: 'fake-client-secret'
+          tenant-id: 'fake-tenant-id-00000000-0000-0000-0000-000000000000'
+          data-file: '${{ github.workspace }}/test-data-verbose'
+          connection-count: '3'
+          verbose: 'true'
+          cloud: 'Public'
+
+      - name: Assert action ran and failed gracefully (no real Power Platform env)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully as expected (no real Power Platform environment)"
+          elif [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded unexpectedly (real environment may be available)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

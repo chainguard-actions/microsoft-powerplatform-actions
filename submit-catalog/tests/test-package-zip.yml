@@ -61,7 +61,7 @@ jobs:
           package-zip: '${{ github.workspace }}/packages/test-package.zip'
           poll-status: 'false'
 
-      - name: Assert action ran with package-zip input (fails gracefully on fake credentials)
+      - name: Assert action ran with package-zip input (fails gracefully without real credentials)
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
@@ -69,7 +69,7 @@ jobs:
           if [ "$OUTCOME" = "success" ]; then
             echo "PASS: action succeeded"
           elif [ "$OUTCOME" = "failure" ]; then
-            echo "PASS: action failed gracefully (expected with fake credentials/environment)"
+            echo "PASS: action failed gracefully (no real Power Platform credentials available)"
           else
             echo "FAIL: unexpected outcome '$OUTCOME'"
             exit 1

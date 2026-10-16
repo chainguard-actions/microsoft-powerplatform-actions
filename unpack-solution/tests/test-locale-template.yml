@@ -12,14 +12,14 @@ jobs:
           mkdir -p "$GITHUB_WORKSPACE/test-input"
           mkdir -p "$GITHUB_WORKSPACE/test-output-locale"
           cd "$GITHUB_WORKSPACE/test-input"
-          echo '<?xml version="1.0" encoding="utf-8"?><ImportExportXml version="9.1.0.0" SolutionPackageVersion="9.1" languagecode="1033" generatedBy="CrmExport"><SolutionManifest><UniqueName>TestSolution</UniqueName><LocalizedNames><LocalizedName description="Test Solution" languagecode="1033"/></LocalizedNames><Version>1.0.0.0</Version><Managed>0</Managed></SolutionManifest></ImportExportXml>' > Solution.xml
-          zip -j "$GITHUB_WORKSPACE/test-input/TestSolution.zip" Solution.xml
+          echo '<?xml version="1.0" encoding="utf-8"?><ImportExportXml version="9.1.0.0" SolutionPackageVersion="9.1" languagecode="1033" generatedBy="CrmExport"><SolutionManifest><UniqueName>TestLocaleSolution</UniqueName><LocalizedNames><LocalizedName description="Test Locale Solution" languagecode="1033"/></LocalizedNames><Version>1.0.0.0</Version><Managed>0</Managed></SolutionManifest></ImportExportXml>' > Solution.xml
+          zip -j "$GITHUB_WORKSPACE/test-input/TestLocaleSolution.zip" Solution.xml
 
       - id: action
         uses: .
         continue-on-error: true
         with:
-          solution-file: "${{ github.workspace }}/test-input/TestSolution.zip"
+          solution-file: "${{ github.workspace }}/test-input/TestLocaleSolution.zip"
           solution-folder: "${{ github.workspace }}/test-output-locale"
           solution-type: Unmanaged
           overwrite-files: 'true'

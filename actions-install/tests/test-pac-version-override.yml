@@ -9,18 +9,11 @@ jobs:
       - id: action
         uses: .
         with:
-          pac-version-override: '1.33.6'
-        continue-on-error: true
-      - name: Assert action ran (succeeded or failed gracefully with specific version)
-        env:
-          OUTCOME: ${{ steps.action.outcome }}
+          pac-version-override: '1.30.6'
+      - name: Assert pac is available after install with version override
         run: |
-          echo "outcome: $OUTCOME"
-          if [ "$OUTCOME" = "success" ]; then
-            echo "PASS: action succeeded with pac-version-override"
-          elif [ "$OUTCOME" = "failure" ]; then
-            echo "PASS: action failed gracefully (version may not be available or network issue)"
-          else
-            echo "FAIL: unexpected outcome '$OUTCOME'"
+          if ! command -v pac &>/dev/null; then
+            echo "FAIL: pac command not found after install with pac-version-override"
             exit 1
           fi
+          echo "PASS: pac is available"

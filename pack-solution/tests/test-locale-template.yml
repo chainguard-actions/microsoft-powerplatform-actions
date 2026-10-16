@@ -1,4 +1,4 @@
-name: Test pack-solution with map-file and process-canvas-apps
+name: Test pack-solution with locale-template input
 on:
   workflow_dispatch:
 jobs:
@@ -7,16 +7,16 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Create minimal solution folder structure and map file
+      - name: Create minimal solution folder structure
         run: |
-          mkdir -p "$GITHUB_WORKSPACE/tests/fixtures/solution-canvas/Other"
-          cat > "$GITHUB_WORKSPACE/tests/fixtures/solution-canvas/Other/Solution.xml" << 'EOF'
+          mkdir -p "$GITHUB_WORKSPACE/tests/fixtures/solution-locale/Other"
+          cat > "$GITHUB_WORKSPACE/tests/fixtures/solution-locale/Other/Solution.xml" << 'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <ImportExportXml version="9.0.0.0" SolutionPackageVersion="9.0" languagecode="1033" generatedBy="CrmLive">
             <SolutionManifest>
-              <UniqueName>TestSolutionCanvas</UniqueName>
+              <UniqueName>LocaleSolution</UniqueName>
               <LocalizedNames>
-                <LocalizedName description="Test Solution Canvas" languagecode="1033" />
+                <LocalizedName description="Locale Solution" languagecode="1033" />
               </LocalizedNames>
               <Descriptions />
               <Version>1.0.0.0</Version>
@@ -38,21 +38,15 @@ jobs:
             </SolutionManifest>
           </ImportExportXml>
           EOF
-          cat > "$GITHUB_WORKSPACE/tests/fixtures/solution-map.xml" << 'EOF'
-          <?xml version="1.0" encoding="utf-8"?>
-          <Mapping>
-          </Mapping>
-          EOF
 
       - id: pack
         uses: .
         continue-on-error: true
         with:
-          solution-file: "${{ github.workspace }}/tests/fixtures/TestSolutionCanvas.zip"
-          solution-folder: "${{ github.workspace }}/tests/fixtures/solution-canvas"
+          solution-file: "${{ github.workspace }}/tests/fixtures/LocaleSolution.zip"
+          solution-folder: "${{ github.workspace }}/tests/fixtures/solution-locale"
           solution-type: "Unmanaged"
-          map-file: "${{ github.workspace }}/tests/fixtures/solution-map.xml"
-          process-canvas-apps: "true"
+          locale-template: "1033"
 
       - name: Assert action ran (pack attempted or failed gracefully)
         env:

@@ -11,12 +11,12 @@ jobs:
         continue-on-error: true
         with:
           environment-url: 'https://test-env.crm.dynamics.com'
-          backup-label: 'test-backup-with-notes'
+          backup-label: 'test-backup-notes'
           notes: 'This is a deprecated notes field test'
           app-id: 'fake-app-id'
           client-secret: 'fake-client-secret'
           tenant-id: 'fake-tenant-id'
-      - name: Assert action ran (notes input accepted, fails gracefully without real credentials)
+      - name: Assert action ran (notes input accepted, failed gracefully without real credentials)
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |

@@ -18,15 +18,15 @@ jobs:
           catalog-item-id: 'fake-catalog-item-id'
           target-url: 'https://target-env.crm.dynamics.com'
 
-      - name: Assert action ran (expected to fail gracefully with fake credentials)
+      - name: Assert action ran with target-url input (fails gracefully with fake credentials)
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
           echo "outcome: $OUTCOME"
-          if [ "$OUTCOME" = "failure" ]; then
-            echo "PASS: action failed gracefully as expected with fake credentials"
-          elif [ "$OUTCOME" = "success" ]; then
+          if [ "$OUTCOME" = "success" ]; then
             echo "PASS: action succeeded"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (expected with fake credentials/sentinel repo)"
           else
             echo "FAIL: unexpected outcome '$OUTCOME'"
             exit 1

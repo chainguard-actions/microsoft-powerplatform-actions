@@ -7,11 +7,10 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Create working directory with a dummy solution file
+      - name: Create working directory and dummy solution file
         run: |
-          mkdir -p "$GITHUB_WORKSPACE/my-working-dir"
-          # Create a minimal zip file as a placeholder solution
-          echo "PK" > "$GITHUB_WORKSPACE/my-working-dir/MySolution.zip"
+          mkdir -p "$GITHUB_WORKSPACE/my-work-dir"
+          echo "dummy" > "$GITHUB_WORKSPACE/my-work-dir/solution.zip"
 
       - id: action
         uses: .
@@ -21,8 +20,8 @@ jobs:
           app-id: 'fake-app-id'
           client-secret: 'fake-client-secret'
           tenant-id: 'fake-tenant-id'
-          solution-file: 'MySolution.zip'
-          working-directory: '${{ github.workspace }}/my-working-dir'
+          solution-file: 'solution.zip'
+          working-directory: '${{ github.workspace }}/my-work-dir'
 
       - name: Assert action ran with working-directory input
         env:
@@ -32,7 +31,7 @@ jobs:
           if [ "$OUTCOME" = "success" ]; then
             echo "PASS: action succeeded"
           elif [ "$OUTCOME" = "failure" ]; then
-            echo "PASS: action failed gracefully (expected without real credentials)"
+            echo "PASS: action failed gracefully (expected without real credentials/environment)"
           else
             echo "FAIL: unexpected outcome '$OUTCOME'"
             exit 1

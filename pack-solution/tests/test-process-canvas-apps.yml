@@ -1,0 +1,63 @@
+name: Test pack-solution with process-canvas-apps input
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Create minimal solution folder structure
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/tests/fixtures/solution-canvas/Other"
+          cat > "$GITHUB_WORKSPACE/tests/fixtures/solution-canvas/Other/Solution.xml" << 'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <ImportExportXml version="9.0.0.0" SolutionPackageVersion="9.0" languagecode="1033" generatedBy="CrmLive">
+            <SolutionManifest>
+              <UniqueName>CanvasSolution</UniqueName>
+              <LocalizedNames>
+                <LocalizedName description="Canvas Solution" languagecode="1033" />
+              </LocalizedNames>
+              <Descriptions />
+              <Version>1.0.0.0</Version>
+              <Managed>0</Managed>
+              <Publisher>
+                <UniqueName>DefaultPublisher</UniqueName>
+                <LocalizedNames>
+                  <LocalizedName description="Default Publisher" languagecode="1033" />
+                </LocalizedNames>
+                <Descriptions />
+                <EMailAddress />
+                <SupportingWebsiteUrl />
+                <CustomizationPrefix>new</CustomizationPrefix>
+                <CustomizationOptionValuePrefix>10000</CustomizationOptionValuePrefix>
+                <Addresses />
+              </Publisher>
+              <RootComponents />
+              <MissingDependencies />
+            </SolutionManifest>
+          </ImportExportXml>
+          EOF
+
+      - id: pack
+        uses: .
+        continue-on-error: true
+        with:
+          solution-file: "${{ github.workspace }}/tests/fixtures/CanvasSolution.zip"
+          solution-folder: "${{ github.workspace }}/tests/fixtures/solution-canvas"
+          solution-type: "Unmanaged"
+          process-canvas-apps: "true"
+
+      - name: Assert action ran (pack attempted or failed gracefully)
+        env:
+          OUTCOME: ${{ steps.pack.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (expected without PP environment)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

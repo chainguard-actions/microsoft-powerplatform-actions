@@ -15,15 +15,15 @@ jobs:
           password-secret: 'fake-password-for-testing'
           solution-name: 'TestSolution'
           solution-output-file: 'TestSolution.zip'
-      - name: Assert action ran (failed gracefully with invalid credentials)
+      - name: Assert action ran (succeeded or failed gracefully with fake credentials)
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
           echo "outcome: $OUTCOME"
           if [ "$OUTCOME" = "success" ]; then
-            echo "PASS: action succeeded unexpectedly (real env available)"
+            echo "PASS: action succeeded"
           elif [ "$OUTCOME" = "failure" ]; then
-            echo "PASS: action failed gracefully as expected with fake credentials"
+            echo "PASS: action failed gracefully (expected with fake credentials/sentinel repo)"
           else
             echo "FAIL: unexpected outcome '$OUTCOME'"
             exit 1

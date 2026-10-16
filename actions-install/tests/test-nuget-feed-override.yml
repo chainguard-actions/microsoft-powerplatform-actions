@@ -1,4 +1,4 @@
-name: Test nuget-feed-override with credentials inputs
+name: Test nuget-feed-override inputs
 on:
   workflow_dispatch:
 jobs:
@@ -6,26 +6,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Create a local nuget feed directory
-        run: |
-          mkdir -p /tmp/local-nuget-feed
       - id: action
         uses: .
         with:
-          nuget-feed-override: '/tmp/local-nuget-feed'
-          nuget-feed-username: 'testuser'
-          nuget-feed-password: 'testpassword'
-        continue-on-error: true
-      - name: Assert action ran (succeeded or failed gracefully with custom feed)
-        env:
-          OUTCOME: ${{ steps.action.outcome }}
+          nuget-feed-override: 'https://api.nuget.org/v3/index.json'
+          nuget-feed-username: ''
+          nuget-feed-password: ''
+      - name: Assert pac is available after install
         run: |
-          echo "outcome: $OUTCOME"
-          if [ "$OUTCOME" = "success" ]; then
-            echo "PASS: action succeeded with nuget-feed-override"
-          elif [ "$OUTCOME" = "failure" ]; then
-            echo "PASS: action failed gracefully (local feed does not contain PAC packages)"
-          else
-            echo "FAIL: unexpected outcome '$OUTCOME'"
+          if ! command -v pac &>/dev/null; then
+            echo "FAIL: pac command not found after install with nuget-feed-override"
             exit 1
           fi
+          echo "PASS: pac is available"

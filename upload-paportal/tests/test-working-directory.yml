@@ -9,29 +9,29 @@ jobs:
 
       - name: Create working directory and upload path
         run: |
-          mkdir -p "$GITHUB_WORKSPACE/work-dir/portal-content"
-          echo "placeholder" > "$GITHUB_WORKSPACE/work-dir/portal-content/index.html"
+          mkdir -p /tmp/test-workdir/portal-content
+          echo "test content" > /tmp/test-workdir/portal-content/index.html
 
       - id: action
         uses: .
         continue-on-error: true
         with:
           environment-url: 'https://test-env.crm.dynamics.com'
+          upload-path: '/tmp/test-workdir/portal-content'
+          working-directory: '/tmp/test-workdir'
           app-id: 'fake-app-id'
           client-secret: 'fake-client-secret'
           tenant-id: 'fake-tenant-id'
-          upload-path: 'portal-content'
-          working-directory: '${{ github.workspace }}/work-dir'
 
       - name: Assert action ran with working-directory input
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
           echo "outcome: $OUTCOME"
-          if [ "$OUTCOME" = "failure" ]; then
-            echo "PASS: action failed gracefully as expected with invalid credentials"
-          elif [ "$OUTCOME" = "success" ]; then
-            echo "PASS: action succeeded unexpectedly (real credentials may have been used)"
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (expected with fake credentials/sentinel repo)"
           else
             echo "FAIL: unexpected outcome '$OUTCOME'"
             exit 1

@@ -1,4 +1,4 @@
-name: Test install-catalog with target-url input
+name: Test target-url input (deprecated)
 on:
   workflow_dispatch:
 jobs:
@@ -6,7 +6,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
       - id: action
         uses: .
         continue-on-error: true
@@ -17,16 +16,13 @@ jobs:
           tenant-id: 'fake-tenant-id'
           catalog-item-id: 'fake-catalog-item-id'
           target-url: 'https://target-env.crm.dynamics.com'
-
-      - name: Assert action ran with target-url input (fails gracefully with fake credentials)
+      - name: Assert action ran with target-url input
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
           echo "outcome: $OUTCOME"
-          if [ "$OUTCOME" = "success" ]; then
-            echo "PASS: action succeeded"
-          elif [ "$OUTCOME" = "failure" ]; then
-            echo "PASS: action failed gracefully (expected with fake credentials/sentinel repo)"
+          if [ "$OUTCOME" = "success" ] || [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action ran with target-url input (outcome: $OUTCOME)"
           else
             echo "FAIL: unexpected outcome '$OUTCOME'"
             exit 1

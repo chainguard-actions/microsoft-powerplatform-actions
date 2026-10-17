@@ -7,46 +7,11 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Create dummy catalog submission document
-        run: |
-          mkdir -p "$GITHUB_WORKSPACE/catalog"
-          cat > "$GITHUB_WORKSPACE/catalog/submission.json" <<'EOF'
-          {
-            "modelVersion": "1.0.0.0",
-            "operation": "CreateOrUpdate",
-            "sourcePortal": 526430005,
-            "businessJustification": "Test submission",
-            "publisherDetails": {
-              "publisherId": "test-publisher",
-              "publisherDisplayName": "Test Publisher"
-            },
-            "catalogItemDefinition": {
-              "id": "test-item",
-              "displayName": "Test Item",
-              "description": "Test description",
-              "offer": {
-                "type": "Component_Collection",
-                "deploymentType": "Normal",
-                "engineeringName": {
-                  "firstName": "Test",
-                  "lastName": "User",
-                  "email": "test@example.com"
-                },
-                "supportName": {
-                  "firstName": "Test",
-                  "lastName": "User",
-                  "email": "test@example.com"
-                }
-              }
-            }
-          }
-          EOF
-
       - name: Create dummy package zip file
         run: |
-          mkdir -p "$GITHUB_WORKSPACE/packages"
-          echo "dummy package content" > /tmp/dummy.txt
-          zip "$GITHUB_WORKSPACE/packages/test-package.zip" /tmp/dummy.txt
+          mkdir -p "$GITHUB_WORKSPACE/test-artifacts"
+          echo "dummy package content" > "$GITHUB_WORKSPACE/test-artifacts/package.zip"
+          echo "dummy catalog doc" > "$GITHUB_WORKSPACE/test-artifacts/catalog.json"
 
       - id: action
         uses: .
@@ -56,12 +21,12 @@ jobs:
           app-id: 'fake-app-id'
           client-secret: 'fake-client-secret'
           tenant-id: 'fake-tenant-id'
-          path: '${{ github.workspace }}/catalog/submission.json'
+          path: '${{ github.workspace }}/test-artifacts/catalog.json'
           package-solution-zip-file: 'PackageZipFile'
-          package-zip: '${{ github.workspace }}/packages/test-package.zip'
+          package-zip: '${{ github.workspace }}/test-artifacts/package.zip'
           poll-status: 'false'
 
-      - name: Assert action ran with package-zip input (fails gracefully without real credentials)
+      - name: Assert action ran with package-zip input (fails gracefully on invalid credentials)
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
@@ -69,7 +34,7 @@ jobs:
           if [ "$OUTCOME" = "success" ]; then
             echo "PASS: action succeeded"
           elif [ "$OUTCOME" = "failure" ]; then
-            echo "PASS: action failed gracefully (no real Power Platform credentials available)"
+            echo "PASS: action failed gracefully (expected with invalid credentials/environment)"
           else
             echo "FAIL: unexpected outcome '$OUTCOME'"
             exit 1

@@ -9,8 +9,8 @@ jobs:
 
       - name: Create minimal solution folder structure
         run: |
-          mkdir -p "$GITHUB_WORKSPACE/tests/fixtures/solution-locale/Other"
-          cat > "$GITHUB_WORKSPACE/tests/fixtures/solution-locale/Other/Solution.xml" << 'EOF'
+          mkdir -p "$GITHUB_WORKSPACE/tests/fixtures/locale-solution-src/Other"
+          cat > "$GITHUB_WORKSPACE/tests/fixtures/locale-solution-src/Other/Solution.xml" << 'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <ImportExportXml version="9.0.0.0" SolutionPackageVersion="9.0" languagecode="1033" generatedBy="CrmLive">
             <SolutionManifest>
@@ -44,11 +44,11 @@ jobs:
         continue-on-error: true
         with:
           solution-file: "${{ github.workspace }}/tests/fixtures/LocaleSolution.zip"
-          solution-folder: "${{ github.workspace }}/tests/fixtures/solution-locale"
+          solution-folder: "${{ github.workspace }}/tests/fixtures/locale-solution-src"
           solution-type: "Unmanaged"
           locale-template: "1033"
 
-      - name: Assert action ran (pack attempted or failed gracefully)
+      - name: Assert action ran with locale-template input (pack attempted or failed gracefully)
         env:
           OUTCOME: ${{ steps.pack.outcome }}
         run: |

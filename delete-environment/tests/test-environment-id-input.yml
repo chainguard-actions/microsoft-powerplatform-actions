@@ -10,11 +10,11 @@ jobs:
         uses: .
         continue-on-error: true
         with:
-          environment-id: 00000000-0000-0000-0000-000000000001
-          app-id: 00000000-0000-0000-0000-000000000002
-          client-secret: fake-secret
-          tenant-id: 00000000-0000-0000-0000-000000000003
-      - name: Assert action ran (fails gracefully without real Power Platform credentials)
+          environment-id: 'test-env-id-00000000-0000-0000-0000-000000000000'
+          app-id: 'fake-app-id'
+          client-secret: 'fake-client-secret'
+          tenant-id: 'fake-tenant-id'
+      - name: Assert action ran (fails gracefully without real credentials)
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |

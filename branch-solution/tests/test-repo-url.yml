@@ -19,9 +19,9 @@ jobs:
           git lfs uninstall --local 2>/dev/null || true
 
           # Create a sample solution folder with some files
-          mkdir -p "$GITHUB_WORKSPACE/url-solution/src"
-          echo "solution content" > "$GITHUB_WORKSPACE/url-solution/solution.xml"
-          echo "component" > "$GITHUB_WORKSPACE/url-solution/src/component.xml"
+          mkdir -p "$GITHUB_WORKSPACE/repo-url-solution/src"
+          echo "solution content" > "$GITHUB_WORKSPACE/repo-url-solution/solution.xml"
+          echo "component" > "$GITHUB_WORKSPACE/repo-url-solution/src/component.xml"
 
           # Create a bare repo under workspace so it's reachable from the action
           rm -rf "$GITHUB_WORKSPACE/.git-remote"
@@ -33,8 +33,8 @@ jobs:
       - id: action
         uses: .
         with:
-          solution-folder: url-solution
-          solution-target-folder: solutions/url-solution
+          solution-folder: repo-url-solution
+          solution-target-folder: solutions/repo-url-solution
           repo-url: ${{ github.workspace }}/.git-remote
           repo-token: ${{ secrets.GITHUB_TOKEN }}
           branch-name: test-branch-repo-url

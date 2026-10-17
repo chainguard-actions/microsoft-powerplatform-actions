@@ -7,31 +7,32 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Create working directory with a dummy solution file
+      - name: Create working directory and dummy solution file
         run: |
-          mkdir -p "$GITHUB_WORKSPACE/hardened/tests/fixtures/solutions"
-          touch "$GITHUB_WORKSPACE/hardened/tests/fixtures/solutions/MySolution.zip"
+          mkdir -p "$GITHUB_WORKSPACE/my-working-dir"
+          # Create a minimal placeholder zip file so the path exists
+          echo "placeholder" > "$GITHUB_WORKSPACE/my-working-dir/solution.zip"
 
       - id: action
         uses: .
         continue-on-error: true
         with:
-          environment-url: 'https://fake-env.crm.dynamics.com'
+          environment-url: 'https://test-env.crm.dynamics.com'
           app-id: 'fake-app-id'
           client-secret: 'fake-client-secret'
           tenant-id: 'fake-tenant-id'
-          solution-file: 'MySolution.zip'
-          working-directory: '${{ github.workspace }}/hardened/tests/fixtures/solutions'
+          solution-file: 'solution.zip'
+          working-directory: '${{ github.workspace }}/my-working-dir'
 
-      - name: Assert action ran (failed gracefully — no real Power Platform environment)
+      - name: Assert action ran with working-directory input
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
           echo "outcome: $OUTCOME"
-          if [ "$OUTCOME" = "failure" ]; then
-            echo "PASS: action failed gracefully as expected (no real Power Platform environment)"
-          elif [ "$OUTCOME" = "success" ]; then
-            echo "PASS: action succeeded unexpectedly (real environment may be configured)"
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (expected — no real Power Platform environment)"
           else
             echo "FAIL: unexpected outcome '$OUTCOME'"
             exit 1

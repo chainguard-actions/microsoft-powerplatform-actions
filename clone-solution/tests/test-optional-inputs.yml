@@ -1,4 +1,4 @@
-name: Test target-folder input
+name: Test optional inputs (target-folder, working-directory, solution-version)
 on:
   workflow_dispatch:
 jobs:
@@ -6,8 +6,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Create target folder
-        run: mkdir -p "$GITHUB_WORKSPACE/cloned-solution"
+
+      - name: Create working directory
+        run: mkdir -p "$GITHUB_WORKSPACE/work-dir" "$GITHUB_WORKSPACE/work-dir/cloned-solution"
+
       - id: action
         uses: .
         continue-on-error: true
@@ -17,16 +19,21 @@ jobs:
           client-secret: 'fake-client-secret'
           tenant-id: 'fake-tenant-id'
           solution-name: 'FakeSolution'
-          target-folder: 'cloned-solution'
+          solution-version: '1.0.0.0'
+          target-folder: '${{ github.workspace }}/work-dir/cloned-solution'
+          working-directory: '${{ github.workspace }}/work-dir'
+          run-asynchronously: 'false'
+          max-async-wait-time: '30'
+
       - name: Assert action ran (fails gracefully with fake credentials)
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
           echo "outcome: $OUTCOME"
-          if [ "$OUTCOME" = "success" ]; then
-            echo "PASS: action succeeded"
-          elif [ "$OUTCOME" = "failure" ]; then
-            echo "PASS: action failed gracefully with fake credentials (expected)"
+          if [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully as expected with fake credentials"
+          elif [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded unexpectedly (real env?)"
           else
             echo "FAIL: unexpected outcome '$OUTCOME'"
             exit 1

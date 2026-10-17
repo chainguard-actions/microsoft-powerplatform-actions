@@ -9,6 +9,7 @@ jobs:
 
       - name: Create working directory and upload path
         run: |
+          mkdir -p /tmp/test-workdir
           mkdir -p /tmp/test-workdir/portal-content
           echo "test content" > /tmp/test-workdir/portal-content/index.html
 
@@ -17,11 +18,11 @@ jobs:
         continue-on-error: true
         with:
           environment-url: 'https://test-env.crm.dynamics.com'
+          upload-path: '/tmp/test-workdir/portal-content'
+          working-directory: '/tmp/test-workdir'
           app-id: 'fake-app-id'
           client-secret: 'fake-client-secret'
           tenant-id: 'fake-tenant-id'
-          upload-path: '/tmp/test-workdir/portal-content'
-          working-directory: '/tmp/test-workdir'
 
       - name: Assert action ran with working-directory input
         env:

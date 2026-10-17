@@ -6,20 +6,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-
       - id: action
         uses: .
         continue-on-error: true
         with:
-          app-id: 'fake-app-id'
-          client-secret: 'fake-client-secret'
-          tenant-id: 'fake-tenant-id'
-          name: 'test-environment-team'
-          region: 'unitedstates'
-          type: 'Sandbox'
-          team-id: 'fake-teams-team-id-12345'
-
-      - name: Assert action ran (team-id input accepted, fails gracefully without real credentials)
+          app-id: fake-app-id
+          client-secret: fake-client-secret
+          tenant-id: fake-tenant-id
+          name: test-teams-environment
+          region: unitedstates
+          type: Sandbox
+          team-id: 00000000-0000-0000-0000-000000000001
+      - name: Assert action ran with team-id input (fails gracefully without real credentials)
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |

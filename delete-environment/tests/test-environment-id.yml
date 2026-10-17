@@ -6,15 +6,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
       - id: action
         uses: .
         continue-on-error: true
         with:
-          environment-id: 'test-env-id-00000000-0000-0000-0000-000000000000'
+          environment-id: 'fake-env-id-00000000-0000-0000-0000-000000000000'
           app-id: 'fake-app-id'
           client-secret: 'fake-client-secret'
           tenant-id: 'fake-tenant-id'
-      - name: Assert action ran (fails gracefully without real credentials)
+
+      - name: Assert action ran with environment-id input
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
@@ -22,7 +24,7 @@ jobs:
           if [ "$OUTCOME" = "success" ]; then
             echo "PASS: action succeeded"
           elif [ "$OUTCOME" = "failure" ]; then
-            echo "PASS: action failed gracefully (no real Power Platform credentials)"
+            echo "PASS: action failed gracefully (expected — no real Power Platform credentials)"
           else
             echo "FAIL: unexpected outcome '$OUTCOME'"
             exit 1

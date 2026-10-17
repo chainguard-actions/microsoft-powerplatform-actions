@@ -1,4 +1,4 @@
-name: Test pack-solution with locale-template input
+name: Test pack-solution with map-file and localize inputs
 on:
   workflow_dispatch:
 jobs:
@@ -7,16 +7,16 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Create minimal solution folder structure
+      - name: Create minimal solution folder structure and map file
         run: |
-          mkdir -p "$GITHUB_WORKSPACE/tests/fixtures/locale-solution-src/Other"
-          cat > "$GITHUB_WORKSPACE/tests/fixtures/locale-solution-src/Other/Solution.xml" << 'EOF'
+          mkdir -p "$GITHUB_WORKSPACE/tests/fixtures/solution-src-localize/Other"
+          cat > "$GITHUB_WORKSPACE/tests/fixtures/solution-src-localize/Other/Solution.xml" << 'EOF'
           <?xml version="1.0" encoding="utf-8"?>
           <ImportExportXml version="9.0.0.0" SolutionPackageVersion="9.0" languagecode="1033" generatedBy="CrmLive">
             <SolutionManifest>
-              <UniqueName>LocaleSolution</UniqueName>
+              <UniqueName>TestSolutionLocalize</UniqueName>
               <LocalizedNames>
-                <LocalizedName description="Locale Solution" languagecode="1033" />
+                <LocalizedName description="Test Solution Localize" languagecode="1033" />
               </LocalizedNames>
               <Descriptions />
               <Version>1.0.0.0</Version>
@@ -39,16 +39,23 @@ jobs:
           </ImportExportXml>
           EOF
 
+          cat > "$GITHUB_WORKSPACE/tests/fixtures/solution-map.xml" << 'EOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <Mapping>
+          </Mapping>
+          EOF
+
       - id: pack
         uses: .
         continue-on-error: true
         with:
-          solution-file: "${{ github.workspace }}/tests/fixtures/LocaleSolution.zip"
-          solution-folder: "${{ github.workspace }}/tests/fixtures/locale-solution-src"
+          solution-file: "${{ github.workspace }}/tests/fixtures/TestSolutionLocalize.zip"
+          solution-folder: "${{ github.workspace }}/tests/fixtures/solution-src-localize"
           solution-type: "Unmanaged"
-          locale-template: "1033"
+          map-file: "${{ github.workspace }}/tests/fixtures/solution-map.xml"
+          localize: "true"
 
-      - name: Assert action ran with locale-template input (pack attempted or failed gracefully)
+      - name: Assert action ran (pack attempted or failed gracefully)
         env:
           OUTCOME: ${{ steps.pack.outcome }}
         run: |

@@ -7,11 +7,24 @@ jobs:
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Create dummy package zip file
+      - name: Create dummy catalog submission document and package zip
         run: |
-          mkdir -p "$GITHUB_WORKSPACE/test-artifacts"
-          echo "dummy package content" > "$GITHUB_WORKSPACE/test-artifacts/package.zip"
-          echo "dummy catalog doc" > "$GITHUB_WORKSPACE/test-artifacts/catalog.json"
+          mkdir -p "$GITHUB_WORKSPACE/catalog"
+          cat > "$GITHUB_WORKSPACE/catalog/submission.json" <<'EOF'
+          {
+            "modelVersion": "1.0.0.0",
+            "operation": "CreateOrUpdate",
+            "sourcePortal": 526430005,
+            "businessJustification": "Test submission",
+            "publisherDetails": {
+              "publisherId": "test-publisher",
+              "publisherDisplayName": "Test Publisher"
+            },
+            "catalogItems": []
+          }
+          EOF
+          # Create a dummy package zip file
+          echo "dummy package content" > /tmp/dummy-package.zip
 
       - id: action
         uses: .
@@ -21,9 +34,9 @@ jobs:
           app-id: 'fake-app-id'
           client-secret: 'fake-client-secret'
           tenant-id: 'fake-tenant-id'
-          path: '${{ github.workspace }}/test-artifacts/catalog.json'
+          path: '${{ github.workspace }}/catalog/submission.json'
           package-solution-zip-file: 'PackageZipFile'
-          package-zip: '${{ github.workspace }}/test-artifacts/package.zip'
+          package-zip: '/tmp/dummy-package.zip'
           poll-status: 'false'
 
       - name: Assert action ran with package-zip input (fails gracefully on invalid credentials)
@@ -34,7 +47,7 @@ jobs:
           if [ "$OUTCOME" = "success" ]; then
             echo "PASS: action succeeded"
           elif [ "$OUTCOME" = "failure" ]; then
-            echo "PASS: action failed gracefully (expected with invalid credentials/environment)"
+            echo "PASS: action failed gracefully (expected with fake credentials)"
           else
             echo "FAIL: unexpected outcome '$OUTCOME'"
             exit 1

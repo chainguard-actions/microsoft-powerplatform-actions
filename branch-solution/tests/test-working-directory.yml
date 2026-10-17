@@ -9,7 +9,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set up git config, working directory, and local bare remote
+      - name: Set up git config and local bare remote
         run: |
           git config user.email "test@example.com"
           git config user.name "Test User"
@@ -18,7 +18,10 @@ jobs:
           git config lfs.skipPush true
           git lfs uninstall --local 2>/dev/null || true
 
-          # Create a custom working directory with a solution folder inside it
+          # Create a working subdirectory that acts as the working-directory
+          mkdir -p "$GITHUB_WORKSPACE/workdir"
+
+          # Create a sample solution folder inside the working directory
           mkdir -p "$GITHUB_WORKSPACE/workdir/wd-solution/src"
           echo "solution content" > "$GITHUB_WORKSPACE/workdir/wd-solution/solution.xml"
           echo "component" > "$GITHUB_WORKSPACE/workdir/wd-solution/src/component.xml"
